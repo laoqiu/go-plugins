@@ -2,7 +2,7 @@
 
 A repository for [Micro Plugins](https://github.com/micro/go-plugins)
 
-## Nats Streaming Usage
+## Broker Usage of Nats Streaming
 
 ```
 import (
