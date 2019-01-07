@@ -11,26 +11,32 @@ import (
 )
 ...
 func main() {
-    sbroker := stan.NewBroker()
-    service := micro.NewService(
-		    ...
-		    micro.Broker(sbroker),
-	  )
-    if err := sbroker.Init(); err != nil {
-        log.Fatal(err)
-    }
-	  if err := sbroker.Connect(); err != nil {
-		    log.Fatal(err)
-	  }
-	  sub, err := sbroker.Subscribe("foo", func(p broker.Publication) error {
-		    fmt.Println("[sub] received message:", string(p.Message().Body), "header", p.Message().Header)
-		    return p.Ack()
-	  }, stan.SetManualAckMode(), stan.DurableName("i-will-remember"), broker.Queue("bar"))
-	  if err != nil {
-	   	  log.Fatal(err)
-	  }
-	  defer sub.Unsubscribe()
-    ...
+	sbroker := stan.NewBroker()
+	// New Service
+	service := micro.NewService(
+		micro.Name("go.micro.srv.example"),
+		micro.Version("latest"),
+		micro.Broker(sbroker),
+	)
+
+	// Initialise service
+	service.Init()
+
+	if err := sbroker.Init(); err != nil {
+		log.Fatal(err)
+	}
+	if err := sbroker.Connect(); err != nil {
+		log.Fatal(err)
+	}
+	sub, err := sbroker.Subscribe("foo", func(p broker.Publication) error {
+		fmt.Println("[sub] received message:", string(p.Message().Body), "header", p.Message().Header)
+		return p.Ack()
+	}, stan.SetManualAckMode(), stan.DurableName("i-will-remember"), broker.Queue("bar"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer sub.Unsubscribe()
+	...
 }
 ```
 
