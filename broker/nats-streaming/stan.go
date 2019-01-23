@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/micro/go-micro/broker"
-	"github.com/micro/go-micro/broker/codec/json"
 	"github.com/micro/go-micro/cmd"
+	"github.com/micro/go-micro/codec/json"
 	"github.com/nats-io/go-nats"
 	"github.com/nats-io/go-nats-streaming"
 )
@@ -35,7 +35,6 @@ type subscriber struct {
 }
 
 type publication struct {
-	t   string
 	m   *broker.Message
 	msg *stan.Msg
 }
@@ -45,7 +44,7 @@ func init() {
 }
 
 func (n *publication) Topic() string {
-	return n.t
+	return n.msg.Subject
 }
 
 func (n *publication) Message() *broker.Message {
@@ -184,23 +183,20 @@ func (n *nbroker) Subscribe(topic string, handler broker.Handler, opts ...broker
 		if durableName, ok := opt.Context.Value(durableNameKey{}).(string); ok && len(durableName) > 0 {
 			sopts = append(sopts, stan.DurableName(durableName))
 		}
-	}
-
-	if opt.Context != nil {
-		if v, ok := opt.Context.Value(deliverAllAvailableKey{}).(bool); ok && v {
-			sopts = append(sopts, stan.DeliverAllAvailable())
-		}
-	}
-
-	if opt.Context != nil {
-		if v, ok := opt.Context.Value(startWithLastReceivedKey{}).(bool); ok && v {
-			sopts = append(sopts, stan.StartWithLastReceived())
-		}
-	}
-
-	if opt.Context != nil {
 		if ackWait, ok := opt.Context.Value(ackWaitKey{}).(time.Duration); ok {
 			sopts = append(sopts, stan.AckWait(ackWait))
+		}
+		if maxInflight, ok := opt.Context.Value(maxInflightKey{}).(int); ok {
+			sopts = append(sopts, stan.MaxInflight(maxInflight))
+		}
+		if v, ok := opt.Context.Value(deliverAllAvailableKey{}).(bool); ok && v {
+			sopts = append(sopts, stan.DeliverAllAvailable())
+		} else if v, ok := opt.Context.Value(startWithLastReceivedKey{}).(bool); ok && v {
+			sopts = append(sopts, stan.StartWithLastReceived())
+		} else if v, ok := opt.Context.Value(startAtTimeKey{}).(time.Time); ok {
+			sopts = append(sopts, stan.StartAtTime(v))
+		} else if v, ok := opt.Context.Value(startAtSequenceKey{}).(uint64); ok {
+			sopts = append(sopts, stan.StartAtSequence(v))
 		}
 	}
 
@@ -212,7 +208,7 @@ func (n *nbroker) Subscribe(topic string, handler broker.Handler, opts ...broker
 		if err := n.opts.Codec.Unmarshal(msg.Data, &m); err != nil {
 			return
 		}
-		if err := handler(&publication{m: &m, t: msg.Subject, msg: msg}); err != nil {
+		if err := handler(&publication{m: &m, msg: msg}); err != nil {
 			return
 		}
 	}
@@ -237,7 +233,7 @@ func (n *nbroker) String() string {
 func NewBroker(opts ...broker.Option) broker.Broker {
 	options := broker.Options{
 		// Default codec
-		Codec:   json.NewCodec(),
+		Codec:   json.Marshaler{},
 		Context: context.Background(),
 	}
 

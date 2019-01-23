@@ -16,8 +16,11 @@ type clientIdKey struct{}
 type manualAckModeKey struct{}
 type durableNameKey struct{}
 type deliverAllAvailableKey struct{}
+type startAtTimeKey struct{}
+type startAtSequenceKey struct{}
 type startWithLastReceivedKey struct{}
 type ackWaitKey struct{}
+type maxInflightKey struct{}
 
 // NatsOptions accepts nats.Options
 func NatsOptions(opts nats.Options) broker.Option {
@@ -83,6 +86,24 @@ func DeliverAllAvailable() broker.SubscribeOption {
 	}
 }
 
+func StartAtTime(start time.Time) broker.SubscribeOption {
+	return func(o *broker.SubscribeOptions) {
+		if o.Context == nil {
+			o.Context = context.Background()
+		}
+		o.Context = context.WithValue(o.Context, startAtTimeKey{}, start)
+	}
+}
+
+func StartAtSequence(seq uint64) broker.SubscribeOption {
+	return func(o *broker.SubscribeOptions) {
+		if o.Context == nil {
+			o.Context = context.Background()
+		}
+		o.Context = context.WithValue(o.Context, startAtSequenceKey{}, seq)
+	}
+}
+
 func StartWithLastReceived() broker.SubscribeOption {
 	return func(o *broker.SubscribeOptions) {
 		if o.Context == nil {
@@ -98,5 +119,14 @@ func AckWait(t time.Duration) broker.SubscribeOption {
 			o.Context = context.Background()
 		}
 		o.Context = context.WithValue(o.Context, ackWaitKey{}, t)
+	}
+}
+
+func MaxInflight(n int) broker.SubscribeOption {
+	return func(o *broker.SubscribeOptions) {
+		if o.Context == nil {
+			o.Context = context.Background()
+		}
+		o.Context = context.WithValue(o.Context, maxInflightKey{}, n)
 	}
 }
