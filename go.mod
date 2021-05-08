@@ -1,4 +1,4 @@
-module github.com/laoqiu/go-plugins/broker
+module github.com/laoqiu/go-plugins
 
 go 1.14
 

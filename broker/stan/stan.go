@@ -1,5 +1,3 @@
-// Package stan provides a NATS Streaming broker
-// From https://github.com/micro/go-plugins/blob/master/broker/stan/stan.go
 package stan
 
 import (
@@ -208,6 +206,7 @@ func (n *stanBroker) Connect() error {
 	if v, ok := n.opts.Context.Value(connectRetryKey{}).(bool); ok && v {
 		n.connectRetry = true
 	}
+	// glog.Info("stan n.connectRetry =>", n.connectRetry)
 
 	if td, ok := n.opts.Context.Value(connectTimeoutKey{}).(time.Duration); ok {
 		n.connectTimeout = td
@@ -219,19 +218,14 @@ func (n *stanBroker) Connect() error {
 	}
 
 	nopts := []stan.Option{
-		stan.NatsURL(n.sopts.NatsURL),
+		stan.NatsURL(strings.Join(n.addrs, ",")),
 		stan.NatsConn(n.sopts.NatsConn),
 		stan.ConnectWait(n.sopts.ConnectTimeout),
 		stan.PubAckWait(n.sopts.AckTimeout),
 		stan.MaxPubAcksInflight(n.sopts.MaxPubAcksInflight),
 		stan.Pings(n.sopts.PingInterval, n.sopts.PingMaxOut),
+		stan.SetConnectionLostHandler(n.reconnectCB),
 	}
-
-	if n.connectRetry {
-		nopts = append(nopts, stan.SetConnectionLostHandler(n.reconnectCB))
-	}
-
-	nopts = append(nopts, stan.NatsURL(strings.Join(n.addrs, ",")))
 
 	n.nopts = nopts
 	n.clusterID = clusterID
@@ -330,13 +324,14 @@ func (n *stanBroker) Subscribe(topic string, handler broker.Handler, opts ...bro
 
 	opt.AutoAck = !bopts.ManualAcks
 
-	if dn, ok := n.opts.Context.Value(durableKey{}).(string); ok && len(dn) > 0 {
+	if dn, ok := ctx.Value(durableKey{}).(string); ok && len(dn) > 0 {
 		stanOpts = append(stanOpts, stan.DurableName(dn))
 		bopts.DurableName = dn
+		// glog.Info("durable name =>", dn)
 	}
 
-	glog.Info("stan sub.ackSuccess =>", ackSuccess)
-	glog.Info("stan opt.AutoAck =>", opt.AutoAck)
+	// glog.Info("stan sub.ackSuccess =>", ackSuccess)
+	// glog.Info("stan opt.AutoAck =>", opt.AutoAck)
 
 	fn := func(msg *stan.Msg) {
 		var m broker.Message

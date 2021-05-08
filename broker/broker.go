@@ -1,5 +1,3 @@
-// Package broker is an interface used for asynchronous messaging
-// From https://github.com/micro/go-micro/blob/master/broker/broker.go
 package broker
 
 // Broker is an interface used for asynchronous messaging.
