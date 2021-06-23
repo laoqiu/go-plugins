@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package plugins.test;
+
+option go_package = "github.com/laoqiu/go-plugins/test/proto";
+
+service TestServer {
+  rpc Ping(PingRequest) returns (PingResponse) {}
+}
+
+message PingRequest {
+    string id = 1;
+}
+
+message PingResponse {
+    string id = 1;
+}
