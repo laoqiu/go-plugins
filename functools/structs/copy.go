@@ -1,9 +1,14 @@
 package structs
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/mitchellh/mapstructure"
+)
 
 func CopyData(src interface{}, dest interface{}) error {
-	return MapToStruct(dest, StructToMap(src))
+	data := StructToMap(src)
+	return mapstructure.Decode(data, dest)
 }
 
 func CopyDataFromJson(src interface{}, dest interface{}) error {
