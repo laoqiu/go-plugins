@@ -6,13 +6,13 @@ type Access struct {
 	Endpoint string
 	Key      string
 	Secret   string
+	Bucket   string
 }
 
 type Option func(o *Options)
 
 type Options struct {
 	Access
-	Bucket  string
 	Schema  string
 	Context context.Context
 }
@@ -20,12 +20,6 @@ type Options struct {
 func WithAccess(v Access) Option {
 	return func(o *Options) {
 		o.Access = v
-	}
-}
-
-func WithBucket(temp string) Option {
-	return func(o *Options) {
-		o.Bucket = temp
 	}
 }
 

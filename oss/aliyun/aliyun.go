@@ -30,7 +30,7 @@ func (s *osssdk) Init(opts ...oss.Option) error {
 	for _, opt := range opts {
 		opt(o)
 	}
-	if o.Bucket == "" {
+	if o.Access.Bucket == "" {
 		return fmt.Errorf("缺少bucket配置")
 	}
 	// create client
@@ -40,7 +40,7 @@ func (s *osssdk) Init(opts ...oss.Option) error {
 	}
 	s.client = cli
 	s.endpoint = o.Access.Endpoint
-	s.bucket = o.Bucket
+	s.bucket = o.Access.Bucket
 	s.schema = o.Schema
 	return nil
 }

@@ -11,11 +11,11 @@ import (
 func Test_Aliyun(t *testing.T) {
 	sdk := NewOSS()
 	if err := sdk.Init(
-		oss.WithBucket("bcltemp"),
 		oss.WithAccess(oss.Access{
 			Endpoint: "oss-cn-hangzhou.aliyuncs.com",
 			Key:      "",
 			Secret:   "",
+			Bucket:   "bcltemp",
 		})); err != nil {
 		t.Error(err)
 		return
