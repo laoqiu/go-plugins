@@ -3,34 +3,36 @@ package aliyun
 import (
 	"fmt"
 	"io"
+	"net/url"
 	"strings"
 
 	alioss "github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"github.com/laoqiu/go-plugins/oss"
 )
 
+var DefaultSchema = "http"
+
 type osssdk struct {
-	client     *alioss.Client
-	buckets    map[string]bool
-	tempBucket string
-	endpoint   string
+	client   *alioss.Client
+	bucket   string
+	endpoint string
+	schema   string
 }
 
 func NewOSS() *osssdk {
-	return &osssdk{
-		buckets: make(map[string]bool),
-	}
+	return &osssdk{}
 }
 
 func (s *osssdk) Init(opts ...oss.Option) error {
-	o := &oss.Options{}
+	o := &oss.Options{
+		Schema: DefaultSchema,
+	}
 	for _, opt := range opts {
 		opt(o)
 	}
-	if o.TempBucket == "" {
-		return fmt.Errorf("缺少temp bucket配置")
+	if o.Bucket == "" {
+		return fmt.Errorf("缺少bucket配置")
 	}
-	s.tempBucket = o.TempBucket
 	// create client
 	cli, err := alioss.New(o.Endpoint, o.Key, o.Secret)
 	if err != nil {
@@ -38,26 +40,14 @@ func (s *osssdk) Init(opts ...oss.Option) error {
 	}
 	s.client = cli
 	s.endpoint = o.Access.Endpoint
-	// get all buckets
-	resp, err := s.client.ListBuckets()
-	if err != nil {
-		return err
-	}
-	for _, b := range resp.Buckets {
-		s.buckets[b.Name] = true
-	}
-	if !s.buckets[s.tempBucket] {
-		return fmt.Errorf("temp bucket not found")
-	}
+	s.bucket = o.Bucket
+	s.schema = o.Schema
 	return nil
 }
 
 func (s *osssdk) Upload(filename string, reader io.Reader) (string, error) {
 	var out string
-	if err := s.checkBucket(s.tempBucket); err != nil {
-		return out, err
-	}
-	b, err := s.client.Bucket(s.tempBucket)
+	b, err := s.client.Bucket(s.bucket)
 	if err != nil {
 		return out, err
 	}
@@ -65,35 +55,32 @@ func (s *osssdk) Upload(filename string, reader io.Reader) (string, error) {
 		return out, err
 	}
 
-	if strings.HasPrefix(filename, "/") {
-		filename = filename[1:]
-	}
-	out = fmt.Sprintf("http://%s.%s%s", s.tempBucket, s.endpoint, filename)
-	return out, nil
+	return s.toAbsolutePath(filename), nil
 }
 
-func (s *osssdk) Save(bucket, filename string) (string, error) {
-	var out string
-	if err := s.checkBucket(bucket); err != nil {
-		return out, err
+func (s *osssdk) Save(from, to string) (string, error) {
+	// 如果from是绝对路径，转成相对路径
+	if strings.HasPrefix(from, "http") {
+		u, err := url.Parse(from)
+		if err != nil {
+			return "", fmt.Errorf("不是有效的路径参数[from]")
+		}
+		from = u.Path[1:]
 	}
-	b, err := s.client.Bucket(bucket)
+	var out string
+	b, err := s.client.Bucket(s.bucket)
 	if err != nil {
 		return out, err
 	}
-	if _, err := b.CopyObjectFrom(s.tempBucket, filename, filename); err != nil {
-		return out, err
+	if _, err := b.CopyObject(from, to); err != nil {
+		return out, fmt.Errorf("复制文件出错: %v", err)
 	}
-	if strings.HasPrefix(filename, "/") {
-		filename = filename[1:]
-	}
-	out = fmt.Sprintf("http://%s.%s/%s", bucket, s.endpoint, filename)
-	return out, nil
+	return s.toAbsolutePath(to), nil
 }
 
-func (s *osssdk) checkBucket(bucket string) error {
-	if !s.buckets[bucket] {
-		return fmt.Errorf("bucket不存在")
+func (s *osssdk) toAbsolutePath(path string) string {
+	if strings.HasPrefix(path, "/") {
+		path = path[1:]
 	}
-	return nil
+	return fmt.Sprintf("%s://%s.%s/%s", s.schema, s.bucket, s.endpoint, path)
 }

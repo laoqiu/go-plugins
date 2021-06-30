@@ -25,3 +25,9 @@ func HMacSha512(secret, origin string) string {
 	h.Write([]byte(origin))
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
+
+func HMacSha1(secret, origin string) string {
+	h := hmac.New(sha512.New, []byte(secret))
+	h.Write([]byte(origin))
+	return fmt.Sprintf("%x", h.Sum(nil))
+}

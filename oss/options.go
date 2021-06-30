@@ -12,8 +12,9 @@ type Option func(o *Options)
 
 type Options struct {
 	Access
-	TempBucket string
-	Context    context.Context
+	Bucket  string
+	Schema  string
+	Context context.Context
 }
 
 func WithAccess(v Access) Option {
@@ -22,8 +23,14 @@ func WithAccess(v Access) Option {
 	}
 }
 
-func WithTempBucket(temp string) Option {
+func WithBucket(temp string) Option {
 	return func(o *Options) {
-		o.TempBucket = temp
+		o.Bucket = temp
+	}
+}
+
+func WithSchema(schema string) Option {
+	return func(o *Options) {
+		o.Schema = schema
 	}
 }
