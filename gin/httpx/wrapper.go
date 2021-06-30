@@ -1,6 +1,8 @@
 package httpx
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/status"
 )
@@ -21,8 +23,7 @@ func Wrapper(handler HandlerFunc) func(c *gin.Context) {
 			} else {
 				apiException = ServerError()
 			}
-			// apiException.Request = c.Request.Method + " " + c.Request.URL.String()
-			c.JSON(apiException.Code, apiException)
+			c.JSON(http.StatusOK, apiException)
 			return
 		}
 	}
