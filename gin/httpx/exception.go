@@ -34,6 +34,11 @@ func UnknownError(message string) *APIException {
 	return newAPIException(UNKNOWN_ERROR, message)
 }
 
+// 认证错误
+func UnauthorizedError(message string) *APIException {
+	return newAPIException(AUTH_ERROR, message)
+}
+
 // 参数错误
 func ParameterError(message string) *APIException {
 	return newAPIException(PARAMETER_ERROR, message)

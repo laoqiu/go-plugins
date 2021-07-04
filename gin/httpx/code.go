@@ -6,4 +6,5 @@ const (
 	UNKNOWN_ERROR   = 1002 // 未知错误
 	PARAMETER_ERROR = 1003 // 参数错误
 	GRPC_ERROR      = 1004 // 错误
+	AUTH_ERROR      = 1005 // 认证错误
 )
