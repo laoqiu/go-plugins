@@ -8,9 +8,9 @@ import (
 )
 
 type MyStruct struct {
-	Name    string     `json:"name"`
-	Address []*Address `json:"address"`
-	Photos  []string   `json:"photos"`
+	Name    string    `json:"name"`
+	Address []Address `json:"address"`
+	Photos  []string  `json:"photos"`
 }
 
 type Address struct {
@@ -18,7 +18,7 @@ type Address struct {
 }
 
 func Test_CopyData(t *testing.T) {
-	s := &MyStruct{Name: "test", Address: []*Address{
+	s := &MyStruct{Name: "test", Address: []Address{
 		{
 			Addr: "addr 1",
 		},

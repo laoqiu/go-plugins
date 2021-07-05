@@ -29,14 +29,14 @@ func NotFound() *APIException {
 	return newAPIException(NOT_FOUND, http.StatusText(http.StatusNotFound))
 }
 
+// 401认证错误
+func UnauthorizedError() *APIException {
+	return newAPIException(AUTH_ERROR, http.StatusText(http.StatusUnauthorized))
+}
+
 // 未知错误
 func UnknownError(message string) *APIException {
 	return newAPIException(UNKNOWN_ERROR, message)
-}
-
-// 认证错误
-func UnauthorizedError(message string) *APIException {
-	return newAPIException(AUTH_ERROR, message)
 }
 
 // 参数错误
