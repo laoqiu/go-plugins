@@ -1,6 +1,7 @@
 package structs
 
 import (
+	"fmt"
 	"net/url"
 	"reflect"
 	"strings"
@@ -66,7 +67,7 @@ func StructToValues(i interface{}, tag string) url.Values {
 			if len(tag) > 0 {
 				name := strings.Split(tag, ",")[0]
 				if name != "-" {
-					v.Set(name, iVal.Field(i).String())
+					v.Set(name, fmt.Sprintf("%v", iVal.Field(i).Interface()))
 				}
 			}
 		}
