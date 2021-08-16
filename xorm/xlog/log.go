@@ -11,9 +11,9 @@ type XLog struct {
 	showSQL bool
 }
 
-func NewXormLog(l *logrus.Logger) *XLog {
+func NewXormLog() *XLog {
 	return &XLog{
-		Logger: l,
+		Logger: logrus.StandardLogger(),
 	}
 }
 
