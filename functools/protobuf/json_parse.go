@@ -33,7 +33,7 @@ func (p ProtobufJSON) GetTagMessage(tags ...string) []ProtobufJSON {
 func (p ProtobufJSON) getOneLevelTagValue(wire string, tag string) []interface{} {
 	vals := []interface{}{}
 	for k, v := range p {
-		if ok, _ := regexp.MatchString(fmt.Sprintf("%s:(\\d{2}):%s", tag, wire), k); ok {
+		if ok, _ := regexp.MatchString(fmt.Sprintf("%s:(\\d+):%s", tag, wire), k); ok {
 			vals = append(vals, v)
 		}
 	}
