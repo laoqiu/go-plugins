@@ -65,6 +65,15 @@ func (r *etcdResolver) Grant(ctx context.Context, ttl int64) (*clientv3.LeaseGra
 	return r.cli.Grant(ctx, ttl)
 }
 
-func (r *etcdResolver) KeepAlive(ctx context.Context, id clientv3.LeaseID) (<-chan *clientv3.LeaseKeepAliveResponse, error) {
-	return r.cli.KeepAlive(ctx, id)
+func (r *etcdResolver) KeepAlive(ctx context.Context, id clientv3.LeaseID) error {
+	respCh, err := r.cli.KeepAlive(ctx, id)
+	if err != nil {
+		return err
+	}
+	for {
+		resp := <-respCh
+		if resp == nil {
+			return nil
+		}
+	}
 }
