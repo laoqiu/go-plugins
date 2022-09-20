@@ -1,4 +1,4 @@
-package selector
+package etcd
 
 type Option func(o *Options)
 
