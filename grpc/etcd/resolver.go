@@ -70,10 +70,13 @@ func (r *etcdResolver) KeepAlive(ctx context.Context, id clientv3.LeaseID) error
 	if err != nil {
 		return err
 	}
-	for {
-		resp := <-respCh
-		if resp == nil {
-			return nil
+	go func() {
+		for {
+			resp := <-respCh
+			if resp == nil {
+				break
+			}
 		}
-	}
+	}()
+	return nil
 }
