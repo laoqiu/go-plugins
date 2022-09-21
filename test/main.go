@@ -46,20 +46,10 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	go func(ctx context.Context) {
-		defer fmt.Println("keep alive exit")
-		respCh, err := r.KeepAlive(ctx, lease.ID)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		for {
-			resp := <-respCh
-			if resp == nil {
-				break
-			}
-		}
-	}(ctx)
+	if err := r.KeepAlive(ctx, lease.ID); err != nil {
+		log.Fatalln(err)
+		return
+	}
 
 	fmt.Println("start server")
 
