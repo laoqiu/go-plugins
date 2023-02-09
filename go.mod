@@ -6,7 +6,7 @@ require (
 	github.com/aliyun/aliyun-oss-go-sdk v2.1.8+incompatible
 	github.com/baiyubin/aliyun-sts-go-sdk v0.0.0-20180326062324-cfa1a18b161f // indirect
 	github.com/fullstorydev/grpcurl v1.8.1
-	github.com/gin-gonic/gin v1.7.2
+	github.com/gin-gonic/gin v1.7.7
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/golang/protobuf v1.5.2
