@@ -1,6 +1,11 @@
 package httpx
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+
+	"google.golang.org/grpc/status"
+)
 
 type APIException struct {
 	Code    int    `json:"code"`
@@ -45,11 +50,14 @@ func ParameterError(message string) *APIException {
 }
 
 // grpc错误
-func GRPCError(message string) *APIException {
-	return newAPIException(GRPC_ERROR, message)
+func GRPCError(s *status.Status) *APIException {
+	return newAPIException(int(s.Code()), s.Message())
 }
 
 // 其他错误
-func Exception(code int, message string) *APIException {
+func Exception(code int, message string, args ...interface{}) *APIException {
+	if len(args) > 0 {
+		message = fmt.Sprintf(message, args...)
+	}
 	return newAPIException(code, message)
 }

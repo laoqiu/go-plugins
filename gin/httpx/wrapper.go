@@ -17,11 +17,9 @@ func Wrapper(handler HandlerFunc) func(c *gin.Context) {
 			if h, ok := err.(*APIException); ok {
 				apiException = h
 			} else if e, ok := status.FromError(err); ok {
-				apiException = GRPCError(e.Message())
-			} else if e, ok := err.(error); ok {
-				apiException = UnknownError(e.Error())
+				apiException = GRPCError(e)
 			} else {
-				apiException = ServerError()
+				apiException = UnknownError(err.Error())
 			}
 			c.JSON(http.StatusOK, apiException)
 			return
